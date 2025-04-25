@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="results-header text-center mb-5 p-4 bg-light rounded">
+        <h1 class="display-5 fw-bold mb-3">Analysis Results</h1>
+        <div class="d-flex justify-content-center gap-3 mb-4 flex-wrap">
+            <span class="badge bg-primary rounded-pill p-3">
+                <i class="fas fa-users me-2"></i>{{ speaker_count }} Speaker(s)
+            </span>
+            <span class="badge bg-secondary rounded-pill p-3">
+                <i class="fas fa-clock me-2"></i>{{ "%.2f"|format(duration) }} seconds
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Timeline Visualization -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-timeline me-2"></i>Speaker Timeline</h3>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <img src="{{ url_for('static', filename='visualizations/' + visualizations.timeline) }}"
+                         class="img-fluid rounded mb-3"
+                         alt="Speaker timeline"
+                         onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/fallback.png') }}'">
+                    <div class="mt-auto text-center">
+                        <a href="{{ url_for('main.download', filename='visualizations/' + visualizations.timeline) }}"
+                           class="btn btn-outline-primary">
+                           <i class="fas fa-download me-2"></i>Download Timeline
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Spectrogram Visualization -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-wave-square me-2"></i>Audio Spectrogram</h3>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <img src="{{ url_for('static', filename='visualizations/' + visualizations.spectrogram) }}"
+                         class="img-fluid rounded mb-3"
+                         alt="Audio spectrogram"
+                         onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/fallback.png') }}'">
+                    <div class="mt-auto text-center">
+                        <a href="{{ url_for('main.download', filename='visualizations/' + visualizations.spectrogram) }}"
+                           class="btn btn-outline-primary">
+                           <i class="fas fa-download me-2"></i>Download Spectrogram
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transcript Table -->
+    <div class="card mb-5 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0"><i class="fas fa-scroll me-2"></i>Transcript</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Speaker</th>
+                            <th>Start (s)</th>
+                            <th>End (s)</th>
+                            <th>Duration (s)</th>
+                            <th>Content</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for seg in results %}
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary rounded-pill p-2">
+                                    <i class="fas fa-user me-1"></i>{{ seg.speaker }}
+                                </span>
+                            </td>
+                            <td class="font-monospace">{{ "%.2f"|format(seg.start) }}</td>
+                            <td class="font-monospace">{{ "%.2f"|format(seg.end) }}</td>
+                            <td class="font-monospace">{{ "%.2f"|format(seg.duration) }}</td>
+                            <td class="text-break">{{ seg.text }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Buttons -->
+    <div class="text-center mb-5">
+        <div class="btn-group" role="group">
+            <a href="{{ url_for('main.download', filename='uploads/' + original_filename) }}"
+               class="btn btn-primary btn-lg px-4">
+               <i class="fas fa-file-audio me-2"></i>Original Audio
+            </a>
+            <a href="{{ url_for('main.download', filename='visualizations/' + csv_report) }}"
+               class="btn btn-success btn-lg px-4">
+               <i class="fas fa-file-csv me-2"></i>Full Report (CSV)
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        transition: transform 0.2s;
+        min-height: 400px;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        position: sticky;
+        top: 0;
+    }
+    .font-monospace {
+        font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    }
+    .results-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        backdrop-filter: blur(10px);
+    }
+    .img-fluid {
+        max-height: 300px;
+        object-fit: contain;
+    }
+    .btn-group {
+        gap: 1rem;
+    }
+</style>
+{% endblock %}
